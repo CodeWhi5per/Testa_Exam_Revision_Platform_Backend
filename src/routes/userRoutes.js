@@ -6,5 +6,6 @@ router.post("/login", userController.login);
 router.post("/register", userController.register);
 router.get("/deleteUser/:role/:id", userController.deleteUser);
 router.get("/getInstructors", userController.getAllInstructors);
+router.get("/userApproval/:userId/:status", userController.userApproval);
 
 module.exports = router;

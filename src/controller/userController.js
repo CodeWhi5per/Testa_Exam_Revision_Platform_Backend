@@ -7,18 +7,21 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
         let user = await Admin.findOne({ email });
-        if (user && user.status !== "DELETED" && await bcrypt.compare(password, user.password)) {
-            return res.status(200).json({ name: user.name });
+        if (user && user.status !== "Deleted" && await bcrypt.compare(password, user.password)) {
+            user.password = undefined;
+            return res.status(200).json({user});
         }
 
         user = await Student.findOne({ email });
-        if (user && user.status !== "DELETED" && await bcrypt.compare(password, user.password)) {
-            return res.status(200).json({ name: user.name });
+        if (user && user.status !== "Deleted" && await bcrypt.compare(password, user.password)) {
+            user.password = undefined;
+            return res.status(200).json({user});
         }
 
         user = await Instructor.findOne({ email });
-        if (user && user.status !== "DELETED" && await bcrypt.compare(password, user.password)) {
-            return res.status(200).json({ name: user.name });
+        if (user && user.status !== "Deleted" && user.status !== "Pending" && user.status !== "Rejected" && await bcrypt.compare(password, user.password)) {
+            user.password = undefined;
+            return res.status(200).json({user});
         }
 
         res.status(401).json({ error: "Invalid email or password" });
@@ -30,6 +33,12 @@ exports.login = async (req, res) => {
 exports.register = async (req, res) => {
     const { name, email, password, role } = req.body;
     try {
+        // Check if email already exists
+        let existingUser = await Admin.findOne({ email }) || await Student.findOne({ email }) || await Instructor.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: "Email already in use" });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
         let user;
@@ -66,7 +75,7 @@ exports.deleteUser = async (req, res) => {
             return res.status(404).json({ error: "User not found" });
         }
 
-        user.status = "DELETED";
+        user.status = "Deleted";
         await user.save();
         res.status(200).json({ message: "User deleted successfully!" });
     } catch (error) {
@@ -77,8 +86,29 @@ exports.deleteUser = async (req, res) => {
 
 exports.getAllInstructors = async (req, res) => {
     try {
-        const instructors = await Instructor.find({ status: { $ne: "DELETED" } }).select("name email status");
+        const instructors = await Instructor.find().select("name email status role");
         res.status(200).json(instructors);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.userApproval = async (req, res) => {
+    const { userId, status } = req.params;
+
+    if (!["Approved", "Rejected"].includes(status)) {
+        return res.status(400).json({ error: "Invalid status" });
+    }
+
+    try {
+        const user = await Instructor.findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        user.status = status;
+        await user.save();
+        res.status(200).json({ message: `User ${status.toLowerCase()} successfully` });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
