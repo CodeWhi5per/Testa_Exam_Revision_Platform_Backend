@@ -86,8 +86,17 @@ exports.deleteUser = async (req, res) => {
 
 exports.getAllInstructors = async (req, res) => {
     try {
-        const instructors = await Instructor.find().select("name email status role");
+        const instructors = await Instructor.find().select("name email status role createdDate");
         res.status(200).json(instructors);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.getPendingInstructors = async (req, res) => {
+    try {
+        const pendingInstructors = await Instructor.find({ status: "Pending" }).select("name email status role createdDate");
+        res.status(200).json(pendingInstructors);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

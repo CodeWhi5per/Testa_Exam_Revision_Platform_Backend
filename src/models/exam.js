@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const ExamSchema = new mongoose.Schema({
+    authorId: String,
     author: String,
     name: String,
     department: String,

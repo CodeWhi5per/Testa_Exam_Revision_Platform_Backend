@@ -6,6 +6,7 @@ const InstructorSchema = new mongoose.Schema({
     password: String,
     role: { type: String, default: "instructor" },
     status: { type: String, default: "Pending" },
+    createdDate: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model("Instructor", InstructorSchema);

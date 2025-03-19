@@ -6,6 +6,7 @@ const StudentSchema = new mongoose.Schema({
     password: String,
     role: { type: String, default: "student" },
     status: { type: String, default: null },
+    createdDate: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model("Student", StudentSchema);

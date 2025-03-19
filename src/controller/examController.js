@@ -15,7 +15,7 @@ exports.getAllCourses = async (req, res) => {
 };
 
 exports.uploadExam = async (req, res) => {
-    const { author, name, department, course, level, unitName, description, price, topics } = req.body;
+    const { authorId, author, name, department, course, level, unitName, description, price, topics } = req.body;
 
     if (!req.file) {
         return res.status(400).json({ error: "File is required" });
@@ -25,6 +25,7 @@ exports.uploadExam = async (req, res) => {
 
     try {
         const exam = new Exam({
+            authorId,
             author,
             name,
             department,
@@ -137,6 +138,17 @@ exports.getPurchasedExams = async (req, res) => {
         }
 
         res.status(200).json(exam);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.getExamsByAuthor = async (req, res) => {
+    const { authorId } = req.params;
+
+    try {
+        const exams = await Exam.find({ authorId });
+        res.status(200).json(exams);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
