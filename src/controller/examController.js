@@ -124,20 +124,18 @@ exports.buyExam = async (req, res) => {
 
 
 exports.getPurchasedExams = async (req, res) => {
-    const { examId, userId } = req.params;
+    const { userId } = req.params;
 
     try {
-        const buyExam = await BuyExam.findOne({ examId, userId });
-        if (!buyExam) {
-            return res.status(404).json({ error: "Purchased exam not found" });
+        const purchasedExams = await BuyExam.find({ userId });
+        if (!purchasedExams.length) {
+            return res.status(404).json({ error: "No purchased exams found" });
         }
 
-        const exam = await Exam.findById(examId);
-        if (!exam) {
-            return res.status(404).json({ error: "Exam not found" });
-        }
+        const examIds = purchasedExams.map(purchase => purchase.examId);
+        const exams = await Exam.find({ _id: { $in: examIds } });
 
-        res.status(200).json(exam);
+        res.status(200).json(exams);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -149,6 +147,21 @@ exports.getExamsByAuthor = async (req, res) => {
     try {
         const exams = await Exam.find({ authorId });
         res.status(200).json(exams);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.getApprovedExamByExamId = async (req, res) => {
+    const { examId } = req.params;
+
+    try {
+        const exam = await Exam.findOne({ _id: examId, status: "Approved" });
+        if (!exam) {
+            return res.status(404).json({ error: "Approved exam not found" });
+        }
+
+        res.status(200).json(exam);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

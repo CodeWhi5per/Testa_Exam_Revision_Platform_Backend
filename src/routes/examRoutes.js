@@ -21,7 +21,8 @@ router.get("/getExams", examController.getExams);
 router.get("/getApprovedExams", examController.getApprovedExams);
 router.get("/examApproval/:examId/:status", examController.examApproval);
 router.post("/buyExams", examController.buyExam);
-router.get("/getPurchasedExams/:examId/:userId", examController.getPurchasedExams);
+router.get("/getPurchasedExams/:userId", examController.getPurchasedExams);
 router.get("/getExamsByAuthor/:authorId", examController.getExamsByAuthor);
+router.get("/getApprovedExamByExamId/:examId", examController.getApprovedExamByExamId);
 
 module.exports = router;
